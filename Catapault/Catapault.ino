@@ -17,7 +17,7 @@ void loop() {
 
 
 void setspeed(int speed) {
-  signal = map(speed, 0, 100, 0, 180); // Remaps a percentage of max speed (0-100) to a servo PWM signal (0-180)
+  int signal = map(speed, 0, 100, 0, 180); // Remaps a percentage of max speed (0-100) to a servo PWM signal (0-180)
   
   servo1.write(signal);
 }
