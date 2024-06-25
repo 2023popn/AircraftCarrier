@@ -10,7 +10,14 @@ void setup() {
 
 void loop() {
   delay(1000);
-  servo1.write(180);
+  setspeed(180);
   delay(1000);
-  servo1.write(0);
+  setspeed(0);
+}
+
+
+void setspeed(int speed) {
+  signal = map(speed, 0, 100, 0, 180); // Remaps a percentage of max speed (0-100) to a servo PWM signal (0-180)
+  
+  servo1.write(signal);
 }
