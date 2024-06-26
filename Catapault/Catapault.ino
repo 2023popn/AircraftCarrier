@@ -26,6 +26,10 @@ void setSpeed(float speed) {
   servo1.write(signal);
 }
 
-float getCurrentSpeed(unsigned long time){
-
+float getCurrentSpeed(unsigned long elapsedTime){
+  if(elapsedTime <= 1375){
+    return elapsedTime * 0.00581;
+  } else {
+    return -1
+  }
 }
