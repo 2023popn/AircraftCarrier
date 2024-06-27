@@ -6,17 +6,34 @@ Servo servo1;
 #define targetVelocity 17
 #define maxPWM 180
 
+#define button 2
+
 void setup() {
-  // Set pin mode
+  // Servo initialization
   servo1.attach(4);
   servo1.write(0);
+
+  // Button initialization
+  pinMode(button, INPUT);
+
+  // Stage Control Variable
+  // stage 0: launch prep
+  // stage 1: launch
+  // stage 2: reset
+  int stage = 0;
 }
 
 void loop() {
-  delay(1000);
-  setSpeed(17);
-  delay(1000);
-  setSpeed(0);
+  if(stage == 1){
+    delay(1000);
+    setSpeed(17);
+    delay(1000);
+    setSpeed(0);
+  }
+
+  if(stage == 2){
+    
+  }
 }
 
 
