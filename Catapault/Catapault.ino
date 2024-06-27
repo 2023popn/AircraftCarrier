@@ -49,6 +49,13 @@ void loop() {
   }
 }
 
+void setBeginTime(){
+  beginTime = millis();
+}
+
+unsigned long getTime(){
+  return millis() - beginTime;
+}
 
 void setSpeed(float speed) {
   int signal = mapGeneric(speed, 0, targetVelocity, 0, maxPWM); // Remaps a percentage of max speed (0-100) to a servo PWM signal (0-180)
