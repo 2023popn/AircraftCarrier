@@ -21,14 +21,27 @@ void setup() {
   // stage 1: launch
   // stage 2: reset
   int stage = 0;
+
+  float currentSpeed = 0;
+  unsigned long beginTime = 0;
+  unsigned long currentTime = 0;
 }
 
 void loop() {
+  if(digitalRead(button)){
+    stage += 1;
+  }
+
+  if(stage == 0){
+    setBeginTime();
+  }
+
   if(stage == 1){
-    delay(1000);
-    setSpeed(17);
-    delay(1000);
-    setSpeed(0);
+    currentTime = getTime();
+
+    currentSpeed = calculateVelocity(currentTime);
+
+    setSpeed(currentSpeed);
   }
 
   if(stage == 2){
@@ -48,5 +61,5 @@ float calculateVelocity(unsigned long elapsedTime){
 }
 
 void retract(){
-  servo1.write(2);
+  setSpeed(2);
 }
