@@ -32,7 +32,7 @@ void loop() {
   }
 
   if(stage == 2){
-    
+    retract()
   }
 }
 
@@ -45,4 +45,8 @@ void setSpeed(float speed) {
 
 float calculateVelocity(unsigned long elapsedTime){
   return elapsedTime * 0.00581;
+}
+
+void retract(){
+  servo1.write(2);
 }
