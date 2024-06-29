@@ -11,8 +11,8 @@ class Motor {
     
     public:
         Motor(int pin);
-        void setSpeed(int speed);
+        void setSpeed(float speed);
         void stop();
-}
+};
 
 #endif

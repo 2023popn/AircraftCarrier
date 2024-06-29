@@ -6,63 +6,51 @@
 #define button 2
 
 enum Stage {launchPrep, launch, reset};
+enum Stage stage;
+
+Motor motor(servoPin);
+float currentSpeed;
+unsigned long beginTime, currentTime;
 
 #define button 2
 
 void setup() {
-  Motor motor(servoPin, maxPWM);
-  
-  // Button initialization
-  pinMode(button, INPUT);
+    // Button initialization
+    pinMode(button, INPUT);
 
-  enum Stage stage = launchPrep;
+    stage = launchPrep;
 
-  float currentSpeed = 0;
-  unsigned long beginTime = 0;
-  unsigned long currentTime = 0;
+    currentSpeed = 0;
+    beginTime = 0;
+    currentTime = 0;
 }
 
 void loop() {
-  if(digitalRead(button)){
-    stage += 1;
-  }
+    if(digitalRead(button)){
+        stage = static_cast<Stage>((stage + 1) % 3);
+        // TODO : find method to get State enum length
+    }
 
 
-  if(stage == launchPrep){
-    setBeginTime();
-  }
+    if(stage == launchPrep){
+        beginTime = millis();
+    }
 
-  if(stage == launch){
-    currentTime = getTime();
+    if(stage == launch){
+        currentTime = millis();
+        unsigned long elapsedTime = currentTime - beginTime;
+        currentSpeed = calculateVelocity(elapsedTime);
+        motor.setSpeed(currentSpeed);
+    }
 
-    currentSpeed = calculateVelocity(currentTime);
-
-    motor.setSpeed(currentSpeed);
-  }
-
-  if(stage == reset){
-    motor.stop()
-    // TODO: implement automatic reset where motor can go to
-    // starting setpoint
-  }
-}
-
-void setBeginTime(){
-  beginTime = millis();
-}
-
-unsigned long getTime(){
-  return millis() - beginTime;
-
-void setBeginTime(){
-  beginTime = millis();
-}
-
-unsigned long getTime(){
-  return millis() - beginTime;
+    if(stage == reset){
+        motor.stop();
+        // TODO: implement automatic reset where motor can go to
+        // starting setpoint
+    }
 }
 
 float calculateVelocity(unsigned long elapsedTime){
-  return elapsedTime * 0.00581;
+    return elapsedTime * 0.00581;
 }
 
