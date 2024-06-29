@@ -1,26 +1,21 @@
-#include <ESP32Servo.h>
-#include <GeneralMap.h>
+#include "Motor.h"
 
-Servo servo1;
+#define servoPin 4
 
-#define targetVelocity 17
-#define maxPWM 180
+// #define targetVelocity 17
+#define button 2
+
+enum Stage {launchPrep, launch, reset};
 
 #define button 2
 
 void setup() {
-  // Servo initialization
-  servo1.attach(4);
-  servo1.write(0);
-
+  Motor motor(servoPin, maxPWM);
+  
   // Button initialization
   pinMode(button, INPUT);
 
-  // Stage Control Variable
-  // stage 0: launch prep
-  // stage 1: launch
-  // stage 2: reset
-  int stage = 0;
+  enum Stage stage = launchPrep;
 
   float currentSpeed = 0;
   unsigned long beginTime = 0;
@@ -32,20 +27,23 @@ void loop() {
     stage += 1;
   }
 
-  if(stage == 0){
+
+  if(stage == launchPrep){
     setBeginTime();
   }
 
-  if(stage == 1){
+  if(stage == launch){
     currentTime = getTime();
 
     currentSpeed = calculateVelocity(currentTime);
 
-    setSpeed(currentSpeed);
+    motor.setSpeed(currentSpeed);
   }
 
-  if(stage == 2){
-    retract()
+  if(stage == reset){
+    motor.stop()
+    // TODO: implement automatic reset where motor can go to
+    // starting setpoint
   }
 }
 
@@ -55,18 +53,16 @@ void setBeginTime(){
 
 unsigned long getTime(){
   return millis() - beginTime;
+
+void setBeginTime(){
+  beginTime = millis();
 }
 
-void setSpeed(float speed) {
-  int signal = mapGeneric(speed, 0, targetVelocity, 0, maxPWM); // Remaps a percentage of max speed (0-100) to a servo PWM signal (0-180)
-  
-  servo1.write(signal);
+unsigned long getTime(){
+  return millis() - beginTime;
 }
 
 float calculateVelocity(unsigned long elapsedTime){
   return elapsedTime * 0.00581;
 }
 
-void retract(){
-  setSpeed(2);
-}
