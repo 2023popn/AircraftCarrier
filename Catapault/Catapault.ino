@@ -1,72 +1,56 @@
-#include <ESP32Servo.h>
-#include <GeneralMap.h>
+#include "Motor.h"
 
-Servo servo1;
+#define servoPin 4
 
-#define targetVelocity 17
-#define maxPWM 180
+// #define targetVelocity 17
+#define button 2
+
+enum Stage {launchPrep, launch, reset};
+enum Stage stage;
+
+Motor motor(servoPin);
+float currentSpeed;
+unsigned long beginTime, currentTime;
 
 #define button 2
 
 void setup() {
-  // Servo initialization
-  servo1.attach(4);
-  servo1.write(0);
+    // Button initialization
+    pinMode(button, INPUT);
 
-  // Button initialization
-  pinMode(button, INPUT);
+    stage = launchPrep;
 
-  // Stage Control Variable
-  // stage 0: launch prep
-  // stage 1: launch
-  // stage 2: reset
-  int stage = 0;
-
-  float currentSpeed = 0;
-  unsigned long beginTime = 0;
-  unsigned long currentTime = 0;
+    currentSpeed = 0;
+    beginTime = 0;
+    currentTime = 0;
 }
 
 void loop() {
-  if(digitalRead(button)){
-    stage += 1;
-  }
+    if(digitalRead(button)){
+        stage = static_cast<Stage>((stage + 1) % 3);
+        // TODO : find method to get State enum length
+    }
 
-  if(stage == 0){
-    setBeginTime();
-  }
 
-  if(stage == 1){
-    currentTime = getTime();
+    if(stage == launchPrep){
+        beginTime = millis();
+    }
 
-    currentSpeed = calculateVelocity(currentTime);
+    if(stage == launch){
+        currentTime = millis();
+        unsigned long elapsedTime = currentTime - beginTime;
+        currentSpeed = calculateVelocity(elapsedTime);
+        motor.setSpeed(currentSpeed);
+    }
 
-    setSpeed(currentSpeed);
-  }
-
-  if(stage == 2){
-    retract()
-  }
-}
-
-void setBeginTime(){
-  beginTime = millis();
-}
-
-unsigned long getTime(){
-  return millis() - beginTime;
-}
-
-void setSpeed(float speed) {
-  int signal = mapGeneric(speed, 0, targetVelocity, 0, maxPWM); // Remaps a percentage of max speed (0-100) to a servo PWM signal (0-180)
-  
-  servo1.write(signal);
+    if(stage == reset){
+        motor.stop();
+        // TODO: implement automatic reset where motor can go to
+        // starting setpoint
+    }
 }
 
 float calculateVelocity(unsigned long elapsedTime){
-  return elapsedTime * 0.00581;
+    return elapsedTime * 0.00581;
 }
 
-void retract(){
-  setSpeed(2);
-}
