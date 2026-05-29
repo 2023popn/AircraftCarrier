@@ -1,5 +1,14 @@
 #include <VescUart.h>
 
+#define IDLE_LIGHT 0
+
+#define CAPTAIN_ARM_SWITCH 1
+#define PILOT_ARM_SWITCH 2
+#define ARMED_LIGHT 3
+
+#define LAUNCH_BUTTON 4
+#define LAUNCH_LIGHT 5
+
 bool is_in_error_state = false;
 
 int state = 0;
@@ -24,7 +33,8 @@ void setup() {
   UART.setSerialPort(&Serial);
 
   // Hardware setup
-  
+  pinMode(CAPTAIN_ARM_SWITCH, INPUT);
+  pinMode(PILOT_ARM_SWITCH, INPUT);
 
   // put your setup code here, to run once:
   float final_speed = 7.5; // m/s
@@ -78,7 +88,49 @@ void idle() {
     state = 4;
   }
 
-  
+  // Switch to armed state when arming switches active
+  if(digitalRead(CAPTAIN_ARM_SWITCH) && digitalRead(PILOT_ARM_SWITCH)){
+    state = 1;
+  }
+}
+
+void armed() {
+  // Armed light always on when in armed state
+  digitalWrite(ARMED_LIGHT, HIGH);
+
+  // If either arming switch is released, return to idle
+  if(!digitalRead(CAPTAIN_ARM_SWITCH) || !digitalRead(PILOT_ARM_SWITCH)) {
+    state = 0;
+  }
+
+  // When lauch button pressed set to launch state
+  if(digitalRead(LAUNCH_BUTTON)) {
+    digitalWrite(ARMED_LIGHT, LOW);
+    state = 2;
+  }
+}
+
+void launching() {
+  current_distance = tach_to_dist(current_tach);
+  current_speed = calc_speed(current_distance);
+
+  // Launch to runway length, then retract
+  if(current_distance < runway_length) {
+    set_speed(current_speed);
+  } else {
+    state = 3;
+  }
+}
+
+void retracting() {
+  current_distance = tach_to_dist(current_tach);
+
+  // Retract to 0, then idle
+  if(current_distance > tach_zero) {
+    set_speed(current_speed);
+  } else {
+    state = 0;
+  }
 }
 
 float tach_to_dist(long current_tach) {
